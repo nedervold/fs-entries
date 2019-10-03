@@ -1,0 +1,44 @@
+name:                fs-entries
+version:             0.1.0.0
+github:              "nedervold/fs-entries"
+license:             BSD3
+author:              "Eric Nedervold"
+maintainer:          "nedervoldsoftware@gmail.com"
+copyright:           "2019 Eric Nedervold"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            
+category:            Data
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/nedervold/fs-entries#readme>
+
+ghc-options: -Wall -Wcompat
+
+dependencies:
+- base >= 4.7 && < 5
+- hedgehog == 1.0.1
+
+library:
+  source-dirs: src
+
+tests:
+  fs-entries-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - fs-entries
+    - hspec == 2.7.1
+    - tasty == 1.2.3
+    - tasty-discover == 4.2.1
+    - tasty-hspec == 1.1.5.1
