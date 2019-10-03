@@ -3,9 +3,13 @@
 {-# LANGUAGE DeriveTraversable #-}
 
 module Data.FSEntries.Types
-  ( FSEntries(..)
+  ( -- * Datatypes
+    FSEntries(..)
   , FSEntry(..)
+    -- * Convenience functions
   , mkFSEntries
+  , mkDir
+  , mkFile
   ) where
 
 import Data.Bifoldable (Bifoldable(..))
@@ -27,9 +31,20 @@ data FSEntry d f
   | File f -- ^ represents a file
   deriving (Eq, Ord, Foldable, Show, Traversable)
 
+------------------------------------------------------------
 -- | A convenience function for creating 'FSEntries'.
 mkFSEntries :: [(String, FSEntry d f)] -> FSEntries d f
 mkFSEntries = FSEntries . M.fromList
+
+-- | A convenience function for creating a named directory 'FSEntry'.
+-- Intended to be used as an argument to 'mkFSEntries' or 'mkDir'.
+mkDir :: String -> d -> [(String, FSEntry d f)] -> (String, FSEntry d f)
+mkDir fileName d entries = (fileName, Dir d $ mkFSEntries entries)
+
+-- | A convenience function for creating a file 'FSEntry' with name.
+-- Intended to be used as an argument to 'mkFSEntries' or 'mkDir'.
+mkFile :: String -> f -> (String, FSEntry d f)
+mkFile fileName f = (fileName, File f)
 
 ------------------------------------------------------------
 instance Functor (FSEntries d) where

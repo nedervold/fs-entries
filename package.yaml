@@ -43,4 +43,5 @@ tests:
     - hspec == 2.7.1
     - tasty == 1.2.3
     - tasty-discover == 4.2.1
+    - tasty-hedgehog == 1.0.0.1
     - tasty-hspec == 1.1.5.1
