@@ -3,8 +3,10 @@
 Datatypes for filesystem-like hierarchical data.
 
 This package is similar to and inspired by
-[directory-tree](http://hackage.haskell.org/package/directory-tree),
-except that in `directory-tree`, the main data structure (`DirTree`)
-represents a directory, while in `fs-entries` the main datatype
-(`FSEntries`) represents the *contents* of a directory.  Leaving the
-root directory implicit makes the design of some algorithms cleaner.
+[directory-tree](http://hackage.haskell.org/package/directory-tree).
+It differs that in `directory-tree`, the central data structure
+(`DirTree`) represents a directory, while in `fs-entries` the central
+datatype (`FSEntries`) represents the *contents* of a directory.
+
+Leaving the root directory `/` anonymous and implicit makes the design
+of some algorithms cleaner.
