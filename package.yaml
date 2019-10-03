@@ -11,7 +11,7 @@ extra-source-files:
 - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            
+synopsis:            Datatype for filesystem-like hierarchical data
 category:            Data
 
 # To avoid duplicated efforts in documentation and dealing with the
@@ -23,6 +23,7 @@ ghc-options: -Wall -Wcompat
 
 dependencies:
 - base >= 4.7 && < 5
+- containers == 0.6.0.1
 - hedgehog == 1.0.1
 
 library:
@@ -38,6 +39,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - fs-entries
+    - hedgehog-classes == 0.2.4
     - hspec == 2.7.1
     - tasty == 1.2.3
     - tasty-discover == 4.2.1
