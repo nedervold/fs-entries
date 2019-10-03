@@ -1,7 +1,5 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
--- | Conversion to and from rose trees from "Data.Tree".
-module Data.FSEntries.Tree
+-- | Conversion to and from rose-tree forests from "Data.Tree".
+module Data.FSEntries.Forest
   ( -- * Conversions
     entriesToForest
   , forestToEntries
@@ -38,9 +36,7 @@ treeToPair (Node (name, Right f) forest) =
 
 -- | A two-dimensional ASCII drawing of an 'FSEntries'.  A wrapper
 -- around "Data.Tree"'s 'drawForest'.
-drawFSEntries
-  :: forall d f.
-     (d -> String) -> (f -> String) -> FSEntries d f -> String
+drawFSEntries :: (d -> String) -> (f -> String) -> FSEntries d f -> String
 drawFSEntries showD showF entries = drawTree (Node "/:" forest')
   where
     forest :: Forest (String, Either String String)
