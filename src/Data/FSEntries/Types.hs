@@ -59,7 +59,7 @@ instance Bifoldable FSEntries where
 
 instance Bitraversable FSEntries where
   bitraverse f g entries =
-    FSEntries <$> (traverse (bitraverse f g) $ unFSEntries entries)
+    FSEntries <$> traverse (bitraverse f g) (unFSEntries entries)
 
 ------------------------------------------------------------
 instance Functor (FSEntry d) where

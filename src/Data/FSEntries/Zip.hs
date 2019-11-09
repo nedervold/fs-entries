@@ -11,11 +11,12 @@ import qualified Data.Map as M
 import Data.Maybe (catMaybes)
 import qualified Data.Set as S
 
--- | Combine two 'FSEntries' values using the given function to merge
--- 'FSEntry's at the same place in the hierarchy.  Since two
--- directories may not both have entries at the same names, the merge
--- function takes optional arguments.  Since errors may arise, the
--- function runs in an 'Applicative'.
+-- | Lift a function that applicatively merges (possibly missing)
+-- 'FSEntry' values into a function that applicatively merges
+-- 'FSEntries'.  Since two directories may not both have entries
+-- present at the same names, we work with 'Maybe' 'FSEntry'
+-- values. The functions run in an 'Applicative' context to allow for
+-- errors.
 zipFSEntriesWithA
   :: forall d d' d'' f f' f'' m.
      Applicative m
@@ -36,7 +37,6 @@ mapMaybeA
   :: Applicative m
   => (a -> m (Maybe b)) -> [a] -> m [b]
 mapMaybeA f = fmap catMaybes . traverse f
-
 {-
 -- This needs to carry location information, so I'll leave it
 -- commented out for later.

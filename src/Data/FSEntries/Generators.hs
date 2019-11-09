@@ -1,4 +1,4 @@
--- | Generators for 'FSEntry' and 'FSEntries'.
+-- | Hedgehog generators for 'FSEntry' and 'FSEntries'.
 module Data.FSEntries.Generators
   ( genFSEntry
   , genFSEntries
