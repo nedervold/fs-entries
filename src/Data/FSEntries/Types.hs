@@ -1,5 +1,6 @@
 -- | Datatypes for filesystem-like hierarchical data.
 {-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 
 module Data.FSEntries.Types
@@ -12,16 +13,18 @@ module Data.FSEntries.Types
   , mkFile
   ) where
 
+import Control.DeepSeq (NFData(..))
 import Data.Bifoldable (Bifoldable(..))
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable (Bitraversable(..))
 import qualified Data.Map as M
+import GHC.Generics (Generic)
 
 -- | A datatype representing the contents of a directory.  Files and
 -- directories may contain arbitrary data.
 newtype FSEntries d f = FSEntries
   { unFSEntries :: M.Map String (FSEntry d f)
-  } deriving (Eq, Ord, Foldable, Show, Traversable)
+  } deriving (Eq, Ord, Foldable, Generic, Show, Traversable)
 
 -- | A datatype representing an element of the contents of a
 -- directory.
@@ -29,7 +32,13 @@ data FSEntry d f
   = Dir d
         (FSEntries d f) -- ^ represents a directory
   | File f -- ^ represents a file
-  deriving (Eq, Ord, Foldable, Show, Traversable)
+  deriving (Eq, Ord, Foldable, Generic, Show, Traversable)
+
+instance (NFData d, NFData f) =>
+         NFData (FSEntries d f)
+
+instance (NFData d, NFData f) =>
+         NFData (FSEntry d f)
 
 ------------------------------------------------------------
 -- | A convenience function for creating 'FSEntries'.

@@ -5,20 +5,23 @@
 module Data.FSEntries.IO
   ( readFSEntries
   , writeFSEntries
+  , readFSEntriesFromFS
+  , writeFSEntriesToFS
     -- * utilities
   , drawDirectory
   ) where
 
 import Control.Monad (forM_, unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import Data.FSEntries.Forest (drawFSEntries)
 import Data.FSEntries.Types
 import qualified Data.Map as M
 import System.Directory
 import System.FilePath ((</>))
-import Text.Printf (printf)
-
-import Data.FSEntries.Forest (drawFSEntries)
 import System.FilePath (makeRelative)
+import Text.Printf (printf)
 
 -- | Given functions to read directory and file data respectively,
 -- return a function that reads an 'FSEntries' value.
@@ -56,6 +59,12 @@ readFSEntries readDirData readFileData rootDir = do
     readDir :: FilePath -> m (FSEntry d f)
     readDir fp = Dir <$> readDirData (rootDir </> fp) <*> readEntries fp
 
+readFSEntriesFromFS :: FilePath -> IO (FSEntries () ByteString)
+readFSEntriesFromFS = readFSEntries readDirData readFileData
+  where
+    readDirData _fp = pure ()
+    readFileData = BS.readFile
+
 -- | Given functions to write directory data (but not contents) and
 -- file data respectively, return a function that writes an
 -- 'FSEntries' value at a 'FilePath'.  Typically you will only create
@@ -69,17 +78,27 @@ writeFSEntries
   -> FilePath
   -> FSEntries d f
   -> m ()
-writeFSEntries writeDir' writeFile' = writeEntries'
+writeFSEntries writeDir' writeFile' fp entries = do
+  absFP <- liftIO $ makeAbsolute fp
+  writeEntries' absFP entries
   where
     writeEntries' :: FilePath -> FSEntries d f -> m ()
-    writeEntries' dir entries =
-      forM_ (M.toList $ unFSEntries entries) $ \(nm, entry) ->
+    writeEntries' dir entries' =
+      forM_ (M.toList $ unFSEntries entries') $ \(nm, entry) ->
         let dir' = dir </> nm
         in case entry of
-             Dir d entries' -> do
+             Dir d entries'' -> do
                writeDir' dir' d
-               writeEntries' dir' entries'
+               writeEntries' dir' entries''
              File f -> writeFile' dir' f
+
+writeFSEntriesToFS
+  :: MonadIO m
+  => FilePath -> FSEntries () ByteString -> m ()
+writeFSEntriesToFS = writeFSEntries writeDir' writeFile'
+  where
+    writeDir' fp () = liftIO $ createDirectory fp
+    writeFile' fp bs = liftIO $ BS.writeFile fp bs
 
 -- | Utility function to draw a diagram of a directory and its contents.
 drawDirectory :: FilePath -> IO ()

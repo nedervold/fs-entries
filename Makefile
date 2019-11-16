@@ -11,7 +11,7 @@ all :
 hindent :
 	find src test -name '*.hs' -exec $(HINDENT) \{} \;
 
-clean : hindent
+clean : # hindent
 	stack clean
 	find . -name '*~' -delete
 	find . -name '#*' -delete
