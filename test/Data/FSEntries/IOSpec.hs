@@ -1,4 +1,6 @@
-module Data.FSEntries.IOSpec where
+module Data.FSEntries.IOSpec
+  ( hprop_io
+  ) where
 
 import Data.ByteString (ByteString)
 import Data.FSEntries.Generators (genFSEntries)
@@ -21,7 +23,7 @@ genFSEntries' = genFSEntries (pure ()) (bytes $ constant 0 maxSize)
 hprop_io :: Property
 hprop_io =
   property $ do
-    entries <- forAll $ genFSEntries'
+    entries <- forAll genFSEntries'
     roundtrippedEntries <- evalIO $ roundtripIO entries
     entries === roundtrippedEntries
 

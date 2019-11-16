@@ -10,7 +10,7 @@ module Data.FSEntries.Forest
 import Data.Bifunctor (Bifunctor(..))
 import Data.FSEntries.Types
 import qualified Data.Map as M
-import Data.Tree
+import Data.Tree (Forest, Tree(..), drawTree)
 import Text.Printf (printf)
 
 -- | Convert an 'FSEntries' to a 'Forest'.
@@ -35,7 +35,7 @@ treeToPair (Node (name, Right f) forest) =
     else error "treeToPair: file Node has descendants"
 
 -- | A two-dimensional ASCII drawing of an 'FSEntries'.  A wrapper
--- around "Data.Tree"'s 'drawForest'.
+-- around 'Data.Tree.drawForest'.
 drawFSEntries :: (d -> String) -> (f -> String) -> FSEntries d f -> String
 drawFSEntries showD showF entries = drawTree (Node "/:" forest')
   where

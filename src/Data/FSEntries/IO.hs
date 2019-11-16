@@ -5,6 +5,7 @@
 module Data.FSEntries.IO
   ( readFSEntries
   , writeFSEntries
+    -- * IO to/from filesystem
   , readFSEntriesFromFS
   , writeFSEntriesToFS
     -- * utilities
@@ -19,8 +20,9 @@ import Data.FSEntries.Forest (drawFSEntries)
 import Data.FSEntries.Types
 import qualified Data.Map as M
 import System.Directory
-import System.FilePath ((</>))
-import System.FilePath (makeRelative)
+       (createDirectory, doesDirectoryExist, doesFileExist, listDirectory,
+        makeAbsolute)
+import System.FilePath ((</>), makeRelative)
 import Text.Printf (printf)
 
 -- | Given functions to read directory and file data respectively,
@@ -59,6 +61,7 @@ readFSEntries readDirData readFileData rootDir = do
     readDir :: FilePath -> m (FSEntry d f)
     readDir fp = Dir <$> readDirData (rootDir </> fp) <*> readEntries fp
 
+-- | Read an 'FSEntries' value from the filesystem at the given path.
 readFSEntriesFromFS :: FilePath -> IO (FSEntries () ByteString)
 readFSEntriesFromFS = readFSEntries readDirData readFileData
   where
@@ -92,6 +95,7 @@ writeFSEntries writeDir' writeFile' fp entries = do
                writeEntries' dir' entries''
              File f -> writeFile' dir' f
 
+-- | Write an 'FSEntries' value to the filesystem at the given path.
 writeFSEntriesToFS
   :: MonadIO m
   => FilePath -> FSEntries () ByteString -> m ()

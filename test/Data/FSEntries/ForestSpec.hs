@@ -1,5 +1,5 @@
 module Data.FSEntries.ForestSpec
-  ( hprop_forest_roundtripping
+  ( hprop_forestRoundtripping
   ) where
 
 import Data.FSEntries.Forest
@@ -12,8 +12,8 @@ import Hedgehog.Range (constant)
 
 -- | Test that conversion of an 'FSEntries' to a rose forest and back
 -- does not change it.
-hprop_forest_roundtripping :: Property
-hprop_forest_roundtripping =
+hprop_forestRoundtripping :: Property
+hprop_forestRoundtripping =
   property $ do
     entries <- forAll $ genFSEntries lower $ int $ constant 1 1000
     trippingToForestAndBack entries

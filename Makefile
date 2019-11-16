@@ -1,4 +1,4 @@
-.PHONY : all clean hindent test
+.PHONY : all clean hindent hlint test
 
 HINDENT = hindent --line-length 76 --sort-imports
 
@@ -10,6 +10,9 @@ all :
 
 hindent :
 	find src test -name '*.hs' -exec $(HINDENT) \{} \;
+
+hlint :
+	hlint src test
 
 clean : # hindent
 	stack clean

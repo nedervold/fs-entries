@@ -1,6 +1,8 @@
 {-# LANGUAGE RankNTypes #-}
 
-module Data.FSEntries.TypesSpec where
+module Data.FSEntries.TypesSpec
+  ( spec_typeclasses
+  ) where
 
 import Data.FSEntries.Generators
 import Hedgehog (Gen)
@@ -12,29 +14,29 @@ import Hedgehog.Range (linear)
 import Test.Tasty.Hspec (Spec, describe, it, shouldBe)
 
 spec_typeclasses :: Spec
-spec_typeclasses = do
-  describe "Data.FSEntries.Types" $ do
-    it "obeys typeclass laws" $ do
-      passed <-
-        lawsCheckMany
-          [ ( "FSEntry"
-            , [ foldableLaws $ genFSEntry genInt
-              , functorLaws $ genFSEntry genInt
-              , traversableLaws $ genFSEntry genInt
-              , bifoldableLaws genFSEntry
-              , bifunctorLaws genFSEntry
-              , bitraversableLaws genFSEntry
-              ])
-          , ( "FSEntries"
-            , [ foldableLaws $ genFSEntries genInt
-              , functorLaws $ genFSEntries genInt
-              , traversableLaws $ genFSEntries genInt
-              , bifoldableLaws genFSEntries
-              , bifunctorLaws genFSEntries
-              , bitraversableLaws genFSEntries
-              ])
-          ]
-      passed `shouldBe` True
+spec_typeclasses =
+  describe "Data.FSEntries.Types" $
+  it "obeys typeclass laws" $ do
+    passed <-
+      lawsCheckMany
+        [ ( "FSEntry"
+          , [ foldableLaws $ genFSEntry genInt
+            , functorLaws $ genFSEntry genInt
+            , traversableLaws $ genFSEntry genInt
+            , bifoldableLaws genFSEntry
+            , bifunctorLaws genFSEntry
+            , bitraversableLaws genFSEntry
+            ])
+        , ( "FSEntries"
+          , [ foldableLaws $ genFSEntries genInt
+            , functorLaws $ genFSEntries genInt
+            , traversableLaws $ genFSEntries genInt
+            , bifoldableLaws genFSEntries
+            , bifunctorLaws genFSEntries
+            , bitraversableLaws genFSEntries
+            ])
+        ]
+    passed `shouldBe` True
 
 genInt :: Gen Int
 genInt = integral $ linear 0 1000

@@ -6,9 +6,9 @@ module Data.FSEntries.Generators
 
 import Data.FSEntries.Types
 import qualified Data.Map as M
-import Hedgehog
-import Hedgehog.Gen
-import qualified Hedgehog.Range as Rng
+import Hedgehog (MonadGen)
+import Hedgehog.Gen (choice, list, lower, recursive, string)
+import Hedgehog.Range (constant, linear)
 
 -- TODO This works, but I don't understand ranges properly.  Figure
 -- them out, then fix this.
@@ -32,7 +32,7 @@ genFSEntries
   :: MonadGen m
   => m d -> m f -> m (FSEntries d f)
 genFSEntries gd gf = do
-  pairs <- list (Rng.linear 0 5) genPair
+  pairs <- list (linear 0 5) genPair
   return $ FSEntries $ M.fromList pairs
   where
     genPair = do
@@ -40,7 +40,8 @@ genFSEntries gd gf = do
       entry <- genFSEntry gd gf
       return (fileName, entry)
 
+-- | Generate a short filename.
 genFileName
   :: MonadGen m
   => m String
-genFileName = string (Rng.constant 1 5) lower
+genFileName = string (constant 1 8) lower
