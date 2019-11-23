@@ -1,9 +1,8 @@
 -- | Datatypes for filesystem-like hierarchical data.
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Data.FSEntries.Functor
@@ -52,7 +51,7 @@ expandEntries
      Applicative f'
   => FSEntries d f -> FSEntriesF f' d f
 expandEntries entries =
-  FSEntriesF $ fmap (pure . expandEntry) $ unFSEntries entries
+  FSEntriesF $ pure . expandEntry <$> unFSEntries entries
 
 -- | Convert an 'FSEntry' into an 'FSEntryF'.  The functor must be
 -- applicative, so we have a 'pure'.
@@ -74,10 +73,6 @@ contractEntries
      Applicative f'
   => JoinFunc f' -> FSEntriesF f' d f -> f' (FSEntries d f)
 contractEntries join' entries = FSEntries <$> join' z
-    -- Oops!  I end up with nested f'.  It's not monadic, so I need
-    -- some specific knowledge of the applicative to join the two
-    -- applications, don't I?  No problem for Validation: it's just a
-    -- coercion.
   where
     z :: f' (f' (M.Map String (FSEntry d f)))
     z =

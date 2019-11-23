@@ -1,7 +1,7 @@
 -- | Functions for zipping two 'FSEntries' together.
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
-{-# LANGUAGE RankNTypes #-}
 
 module Data.FSEntries.Zip where
 
@@ -30,7 +30,7 @@ overrideMergeFunc Nothing rhs = pure rhs
 overrideMergeFunc lhs Nothing = pure lhs
 overrideMergeFunc (Just (FileF _)) f@(Just (FileF _)) = pure f
 -- TODO Implement.
-overrideMergeFunc (Just (DirF () d)) (Just (DirF () d')) =
+overrideMergeFunc (Just (DirF () _entries)) (Just (DirF () _entries')) =
   error "must merge contents"
 overrideMergeFunc _ _ = Failure ()
 

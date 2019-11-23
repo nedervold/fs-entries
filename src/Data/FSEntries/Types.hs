@@ -5,7 +5,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Data.FSEntries.Types
@@ -68,7 +67,7 @@ mkFile fileName f = (fileName, File f)
 
 ------------------------------------------------------------
 instance Bifunctor FSEntries where
-  bimap f g entries = FSEntries $ fmap (bimap f g) $ unFSEntries entries
+  bimap f g entries = FSEntries $ bimap f g <$> unFSEntries entries
 
 instance Bifunctor FSEntry where
   bimap f g (Dir d entries) = Dir (f d) $ bimap f g entries
