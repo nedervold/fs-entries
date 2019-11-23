@@ -9,30 +9,58 @@ import Control.Applicative (liftA2)
 import Data.FSEntries.Functor
 import Data.FSEntries.Types
 import qualified Data.Map as M
+import Data.Maybe (catMaybes)
 import qualified Data.Set as S
 import Data.Validation
-import Safe
 
 -- | Merge optional 'FSEntry's.  They are optional because when
 -- merging two FSEntries, there may or may not be an 'FSEntry' at any
 -- given name.  The result is an 'Applicative' value to allow for
--- errors.  Must not return 'Nothing' except when both arguments are
--- 'Nothing'.
-type MergeFunc f' d f = Maybe (FSEntryF f' d f) -> Maybe (FSEntryF f' d f) -> f' (Maybe (FSEntryF f' d f))
+-- errors.  Will never be called with two 'Nothing' values.
+type MergeFunc f' d f = Maybe (FSEntryF f' d f) -> Maybe (FSEntryF f' d f) -> f' (FSEntryF f' d f)
 
 interleaveMergeFunc :: MergeFunc (Validation ()) d f
-interleaveMergeFunc Nothing rhs = pure rhs
-interleaveMergeFunc lhs Nothing = pure lhs
+interleaveMergeFunc Nothing Nothing = error "interleaveMergeFunc: impossible"
+interleaveMergeFunc Nothing (Just rhs) = pure rhs
+interleaveMergeFunc (Just lhs) Nothing = pure lhs
 interleaveMergeFunc _ _ = Failure ()
 
-overrideMergeFunc :: MergeFunc (Validation ()) () f
-overrideMergeFunc Nothing rhs = pure rhs
-overrideMergeFunc lhs Nothing = pure lhs
-overrideMergeFunc (Just (FileF _)) f@(Just (FileF _)) = pure f
--- TODO Implement.
-overrideMergeFunc (Just (DirF () _entries)) (Just (DirF () _entries')) =
-  error "must merge contents"
+overrideMergeFunc
+  :: forall f.
+     MergeFunc (Validation ()) () f
+overrideMergeFunc Nothing Nothing = error "interleaveMergeFunc: impossible"
+overrideMergeFunc Nothing (Just rhs) = pure rhs
+overrideMergeFunc (Just lhs) Nothing = pure lhs
+overrideMergeFunc (Just (FileF _)) (Just f@(FileF _)) = pure f
+overrideMergeFunc (Just (DirF () entries)) (Just (DirF () entries')) =
+  pure $ DirF () $ mergeFSEntriesF joinV overrideMergeFunc entries entries'
 overrideMergeFunc _ _ = Failure ()
+
+joinV :: Validation e (Validation e a) -> Validation e a
+joinV v =
+  case v of
+    Failure v' -> Failure v'
+    Success v' -> v'
+
+mergeFSEntriesF
+  :: forall f' d f.
+     Applicative f'
+  => (forall a. f' (f' a) -> f' a)
+  -> MergeFunc f' d f
+  -> FSEntriesF f' d f
+  -> FSEntriesF f' d f
+  -> FSEntriesF f' d f
+mergeFSEntriesF join' mergeEntry (FSEntriesF m) (FSEntriesF m') =
+  FSEntriesF $ M.fromList [(key, mergeEntryFor key) | key <- S.toList keys]
+  where
+    mergeEntryFor :: String -> f' (FSEntryF f' d f)
+    mergeEntryFor key = join' $ liftA2 mergeEntry mV mV'
+      where
+        mV, mV' :: f' (Maybe (FSEntryF f' d f))
+        mV = sequenceA $ M.lookup key m
+        mV' = sequenceA $ M.lookup key m'
+    keys :: S.Set String
+    keys = M.keysSet m `S.union` M.keysSet m
 
 concatZip
   :: forall f' d f.
@@ -61,37 +89,9 @@ concatZip join' mergeEntriesF entriesList = contractEntries join' x
           :: f' (Maybe (FSEntryF f' d f))
           -> f' (Maybe (FSEntryF f' d f))
           -> f' (FSEntryF f' d f)
-        h lhs rhs = fromJust <$> join' (liftA2 mergeEntriesF lhs rhs)
-        fromJust :: Maybe a -> a
-        fromJust =
-          fromJustNote
-            "concatZip: mergeEntriesF returned Nothing with non-Nothing arguments"
-{-
--- | Lift a function that applicatively merges (possibly missing)
--- 'FSEntry' values into a function that applicatively merges
--- 'FSEntries'.  Since two directories may not both have entries
--- present at the same names, we work with 'Maybe' 'FSEntry'
--- values. The functions run in an 'Applicative' context to allow for
--- errors.
-zipFSEntriesWithA
-  :: forall d d' d'' f f' f'' m.
-     Applicative m
-  => (Maybe (FSEntry d f) -> Maybe (FSEntry d' f') -> m (Maybe (FSEntry d'' f'')))
-  -> FSEntries d f
-  -> FSEntries d' f'
-  -> m (FSEntries d'' f'')
-zipFSEntriesWithA zipFSEntry (FSEntries m) (FSEntries m') =
-  mkFSEntries <$> mapMaybeA keyToPair keys
-  where
-    keyToPair :: String -> m (Maybe (String, FSEntry d'' f''))
-    keyToPair key =
-      fmap (key, ) <$> zipFSEntry (M.lookup key m) (M.lookup key m')
-    keys :: [String]
-    keys = S.toList $ M.keysSet m `S.union` M.keysSet m'
+        h lhs rhs = join' (liftA2 mergeEntriesF lhs rhs)
 
 mapMaybeA
-  :: Applicative m
-  => (a -> m (Maybe b)) -> [a] -> m [b]
+  :: Applicative f
+  => (a -> f (Maybe b)) -> [a] -> f [b]
 mapMaybeA f = fmap catMaybes . traverse f
-
-------------------------------------------------------------}
