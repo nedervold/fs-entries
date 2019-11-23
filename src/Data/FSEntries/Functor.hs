@@ -6,8 +6,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Data.FSEntries.Functor
-    -- * Datatypes
-  ( FSEntriesF(..)
+  ( -- * Datatypes
+    FSEntriesF(..)
   , FSEntryF(..)
     -- * Construction
   , emptyFSEntriesF
@@ -18,6 +18,7 @@ module Data.FSEntries.Functor
   , contractEntry
   ) where
 
+import Data.FSEntries.Joinable (Joinable(..))
 import Data.FSEntries.Types
 import qualified Data.Map as M
 import GHC.Generics (Generic)
@@ -62,29 +63,24 @@ expandEntry
 expandEntry (Dir d entries) = DirF d $ expandEntries entries
 expandEntry (File f) = FileF f
 
--- TODO Might be better served as a typeclass.
-type JoinFunc f' = forall a. f' (f' a) -> f' a
-
 -- | Convert an 'FSEntriesF' into an applicative value of 'FSEntries'.
 -- The applicative gets applied twice, so we need a function to reduce
 -- it.
 contractEntries
   :: forall f' d f.
-     Applicative f'
-  => JoinFunc f' -> FSEntriesF f' d f -> f' (FSEntries d f)
-contractEntries join' entries = FSEntries <$> join' z
+     Joinable f'
+  => FSEntriesF f' d f -> f' (FSEntries d f)
+contractEntries entries = FSEntries <$> join' z
   where
     z :: f' (f' (M.Map String (FSEntry d f)))
     z =
-      fmap sequenceA $
-      traverse (fmap $ contractEntry join') $ unFSEntriesF entries
+      fmap sequenceA $ traverse (fmap contractEntry) $ unFSEntriesF entries
 
 -- | Convert an 'FSEntryF' into an applicative value of 'FSEntry'.
 -- The applicative gets applied twice, so we need a function to reduce
 -- it.
 contractEntry
-  :: Applicative f'
-  => JoinFunc f' -> FSEntryF f' d f -> f' (FSEntry d f)
-contractEntry join' (DirF d entries) =
-  Dir d <$> contractEntries join' entries
-contractEntry _ (FileF f) = pure $ File f
+  :: Joinable f'
+  => FSEntryF f' d f -> f' (FSEntry d f)
+contractEntry (DirF d entries) = Dir d <$> contractEntries entries
+contractEntry (FileF f) = pure $ File f
