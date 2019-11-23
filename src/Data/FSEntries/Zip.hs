@@ -17,7 +17,12 @@ import Data.FSEntries.Joinable
 import Data.FSEntries.Types
 import qualified Data.Map as M
 import qualified Data.Set as S
-import Data.Validation
+import Data.Validation (Validation(..))
+
+-- TODO Perhaps MergeFunc could be better implemented with a datatype
+-- to remove the impossible state: there can be exactly one or two
+-- FSEntryFs. Do we need the one-FSEntryF case?  In all the versions I
+-- can think of, we just use it if it's a singleton.  Ponder.
 
 -- | Merge optional 'FSEntry's.  They are optional because when
 -- merging two FSEntries, there may or may not be an 'FSEntry' at any

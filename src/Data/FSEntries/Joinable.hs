@@ -2,13 +2,16 @@
 -- to single applications.
 {-# LANGUAGE DefaultSignatures #-}
 
-module Data.FSEntries.Joinable where
+module Data.FSEntries.Joinable
+  ( Joinable(..)
+  ) where
 
 import Control.Monad (join)
-import Data.Validation
+import Data.Validation (Validation(..), valueOr)
 
 -- | An applicative functor where multiple applications can be reduced
--- to single applications.
+-- to single applications.  All monads are 'Joinable' via 'join'; not
+-- all 'Applicative' are.
 class Applicative f =>
       Joinable f where
   join' :: f (f a) -> f a
@@ -18,7 +21,4 @@ class Applicative f =>
 
 instance Semigroup e =>
          Joinable (Validation e) where
-  join' v =
-    case v of
-      Failure e -> Failure e
-      Success v' -> v'
+  join' = valueOr Failure
