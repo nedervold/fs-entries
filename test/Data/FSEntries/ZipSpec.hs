@@ -1,6 +1,7 @@
 module Data.FSEntries.ZipSpec
   ( hprop_interleave
   , hprop_override
+  , spec_interleave
   , spec_override
   ) where
 
@@ -33,19 +34,30 @@ hprop_override =
     entries <- forAll genFSEntries'
     Success entries === override [entries]
     Success entries === override [entries, emptyFSEntries]
+    Success entries === override [entries, emptyFSEntries, entries]
+
+spec_interleave :: Spec
+spec_interleave =
+  describe "interleave" $ do
+    it "works for empty dirs" $ do
+      let lhs = mkFSEntries [mkDir "bar" () []]
+          rhs = mkFSEntries [mkDir "bar" () []]
+      let res :: Validation () (FSEntries () ())
+          res = interleave [lhs, rhs]
+      res `shouldBe` Success lhs
 
 spec_override :: Spec
 spec_override =
-  describe "Data.FSEntries.ZipSpec" $ do
-      it "override works for top-level files" $ do
-        let lhs = mkFSEntries [mkFile "foo" (1 :: Int)]
-            rhs = mkFSEntries [mkFile "foo" 2]
-        override [lhs, rhs] `shouldBe` Success rhs
-      it "override works for secondary-level files" $ do
-        let lhs = mkFSEntries [mkDir "bar" () [mkFile "foo" (1 :: Int)]]
-            rhs = mkFSEntries [mkDir "bar" () [mkFile "foo" 2]]
-        override [lhs, rhs] `shouldBe` Success rhs
-      it "override fails on mismatch" $ do
-        let lhs = mkFSEntries [mkDir "bar" () [mkFile "foo" (1 :: Int)]]
-            rhs = mkFSEntries [mkFile "bar" 2]
-        override [lhs, rhs] `shouldBe` Failure ()
+  describe "override" $ do
+    it "works for top-level files" $ do
+      let lhs = mkFSEntries [mkFile "foo" (1 :: Int)]
+          rhs = mkFSEntries [mkFile "foo" 2]
+      override [lhs, rhs] `shouldBe` Success rhs
+    it "works for secondary-level files" $ do
+      let lhs = mkFSEntries [mkDir "bar" () [mkFile "foo" (1 :: Int)]]
+          rhs = mkFSEntries [mkDir "bar" () [mkFile "foo" 2]]
+      override [lhs, rhs] `shouldBe` Success rhs
+    it "fails on mismatch" $ do
+      let lhs = mkFSEntries [mkDir "bar" () [mkFile "foo" (1 :: Int)]]
+          rhs = mkFSEntries [mkFile "bar" 2]
+      override [lhs, rhs] `shouldBe` Failure ()
