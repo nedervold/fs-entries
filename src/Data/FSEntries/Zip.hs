@@ -63,7 +63,7 @@ mergeFSEntriesF mergeEntry (FSEntriesF m) (FSEntriesF m') =
         mV = sequenceA $ M.lookup key m
         mV' = sequenceA $ M.lookup key m'
     keys :: S.Set String
-    keys = M.keysSet m `S.union` M.keysSet m
+    keys = M.keysSet m `S.union` M.keysSet m'
 
 mergeAllFSEntries ::
      forall f' d f. Joinable f'

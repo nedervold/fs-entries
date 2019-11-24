@@ -15,6 +15,9 @@ hindent :
 hlint :
 	hlint src test
 
+reset : clean
+	-rm -rf .stack-work
+
 clean : # hindent
 	stack clean
 	find . -name '*~' -delete
