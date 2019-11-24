@@ -23,8 +23,9 @@ import Data.FSEntries.Types
 import qualified Data.Map as M
 import GHC.Generics (Generic)
 
-import Data.Validation(Validation)
-import Text.Printf(printf)
+import Data.Validation (Validation)
+import Text.Printf (printf)
+
 type V = Validation ()
 
 -- | A datatype representing the contents of a directory.  Files and
@@ -49,18 +50,19 @@ data FSEntryF f' d f
   deriving (Generic)
 
 instance (Eq d, Eq f) => Eq (FSEntriesF V d f) where
-    FSEntriesF m == FSEntriesF m' = m == m'
+  FSEntriesF m == FSEntriesF m' = m == m'
 
 instance (Eq d, Eq f) => Eq (FSEntryF V d f) where
-    FileF f == FileF f' = f == f'
-    DirF d entries == DirF d' entries' = d == d' && entries == entries'
-    _ == _ = False
+  FileF f == FileF f' = f == f'
+  DirF d entries == DirF d' entries' = d == d' && entries == entries'
+  _ == _ = False
 
 instance Show (FSEntryF V () String) where
-    show (FileF f) = printf "FileF %s" (show f)
-    show (DirF d entries) = printf "DirF %s %s" (show d) (show entries)
+  show (FileF f) = printf "FileF %s" (show f)
+  show (DirF d entries) = printf "DirF %s %s" (show d) (show entries)
+
 instance Show (FSEntriesF V () String) where
-    show (FSEntriesF m) = printf "FSEntries %s" (show m)
+  show (FSEntriesF m) = printf "FSEntries %s" (show m)
 
 ------------------------------------------------------------
 -- | Convert an 'FSEntries' into an 'FSEntriesF'.  The functor must be

@@ -3,9 +3,9 @@ module Data.FSEntries.FunctorSpec
   ) where
 
 import Data.ByteString (ByteString)
+import Data.FSEntries.Functor
 import Data.FSEntries.Generators (genFSEntries)
 import Data.FSEntries.Types (FSEntries)
-import Data.FSEntries.Functor
 import Data.Validation (Validation(..))
 import Hedgehog (MonadGen, Property, (===), forAll, property)
 import Hedgehog.Gen (bytes)

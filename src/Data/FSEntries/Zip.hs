@@ -32,7 +32,8 @@ type MergeFunc f' d f
 type V = Validation ()
 
 interleaveMergeFunc :: MergeFunc V () f
-interleaveMergeFunc Nothing Nothing = error "interleaveMergeFunc: impossible"
+interleaveMergeFunc Nothing Nothing =
+  error "interleaveMergeFunc: impossible"
 interleaveMergeFunc Nothing (Just rhs) = pure rhs
 interleaveMergeFunc (Just lhs) Nothing = pure lhs
 interleaveMergeFunc (Just (DirF () entries)) (Just (DirF () entries')) =
@@ -74,7 +75,8 @@ mergeAllFSEntries ::
 mergeAllFSEntries mergeEntriesF entriesList =
   contractEntries $ foldl mergeMixedEntries emptyFSEntriesF entriesList
   where
-    mergeMixedEntries :: FSEntriesF f' d f -> FSEntries d f -> FSEntriesF f' d f
+    mergeMixedEntries ::
+         FSEntriesF f' d f -> FSEntries d f -> FSEntriesF f' d f
     mergeMixedEntries entriesF entries =
       mergeFSEntriesF mergeEntriesF entriesF (expandEntries entries)
 

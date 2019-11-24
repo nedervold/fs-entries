@@ -7,9 +7,12 @@ module Data.FSEntries.IO
   , writeFSEntries
     -- * IO to/from filesystem
   , readFSEntriesFromFS
+  , lazyReadFSEntriesFromFS
   , writeFSEntriesToFS
+  , writeFSEntriesToFSIfChanged
     -- * utilities
   , drawDirectory
+  , writeFileIfChanged
   ) where
 
 import Control.Monad (forM_, unless)
@@ -74,6 +77,15 @@ readFSEntriesFromFS = readFSEntries readDirData readFileData
     readDirData _fp = pure ()
     readFileData = BS.readFile
 
+-- | Read an 'FSEntries' value from the filesystem at the given path.
+-- The file contents will be 'IO' actions to read in the actual
+-- contents.
+lazyReadFSEntriesFromFS :: FilePath -> IO (FSEntries () (IO ByteString))
+lazyReadFSEntriesFromFS = readFSEntries readDirData readFileData
+  where
+    readDirData _fp = pure ()
+    readFileData fp = return $ BS.readFile fp
+
 -- | Given functions to write directory data (but not contents) and
 -- file data respectively, return a function that writes an
 -- 'FSEntries' value at a 'FilePath'.  Typically you will only create
@@ -107,6 +119,21 @@ writeFSEntriesToFS = writeFSEntries writeDir' writeFile'
   where
     writeDir' fp () = liftIO $ createDirectory fp
     writeFile' fp bs = liftIO $ BS.writeFile fp bs
+
+-- | Write an 'FSEntries' value to the filesystem at the given path
+-- only if the new value differs from the current.
+writeFSEntriesToFSIfChanged ::
+     MonadIO m => FilePath -> FSEntries () ByteString -> m ()
+writeFSEntriesToFSIfChanged = writeFSEntries writeDir' writeFile'
+  where
+    writeDir' fp () = liftIO $ createDirectory fp
+    writeFile' fp bs = liftIO $ writeFileIfChanged fp bs
+
+-- | Write to the file only if the new value differs from the current.
+writeFileIfChanged :: FilePath -> ByteString -> IO ()
+writeFileIfChanged fp newBS = do
+  currentBS <- BS.readFile fp
+  unless (currentBS == newBS) $ BS.writeFile fp newBS
 
 -- | Utility function to draw a diagram of a directory and its contents.
 drawDirectory :: FilePath -> IO ()

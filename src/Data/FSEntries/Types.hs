@@ -16,6 +16,8 @@ module Data.FSEntries.Types
   , mkFSEntries
   , mkDir
   , mkFile
+    -- * Deletion
+  , pruneEmptyDirs
   ) where
 
 import Control.DeepSeq (NFData(..))
@@ -62,6 +64,19 @@ mkDir fileName d entries = (fileName, Dir d $ mkFSEntries entries)
 -- Intended to be used as an argument to 'mkFSEntries' or 'mkDir'.
 mkFile :: String -> f -> (String, FSEntry d f)
 mkFile fileName f = (fileName, File f)
+
+------------------------------------------------------------
+-- | Recursively prune empty directories.
+pruneEmptyDirs :: FSEntries d f -> FSEntries d f
+pruneEmptyDirs (FSEntries entries) =
+  FSEntries $ M.filter (not . isEmptyDir) $ fmap pruneEmptyDirs' entries
+  where
+    isEmptyDir :: FSEntry d f -> Bool
+    isEmptyDir (Dir _ entries') = M.null $ unFSEntries entries'
+    isEmptyDir _ = True
+    pruneEmptyDirs' :: FSEntry d f -> FSEntry d f
+    pruneEmptyDirs' f@(File _) = f
+    pruneEmptyDirs' (Dir d entries') = Dir d $ pruneEmptyDirs entries'
 
 ------------------------------------------------------------
 instance Bifunctor FSEntries where

@@ -38,13 +38,13 @@ hprop_override =
 
 spec_interleave :: Spec
 spec_interleave =
-  describe "interleave" $ do
-    it "works for empty dirs" $ do
-      let lhs = mkFSEntries [mkDir "bar" () []]
-          rhs = mkFSEntries [mkDir "bar" () []]
-      let res :: Validation () (FSEntries () ())
-          res = interleave [lhs, rhs]
-      res `shouldBe` Success lhs
+  describe "interleave" $
+  it "works for empty dirs" $ do
+    let lhs = mkFSEntries [mkDir "bar" () []]
+        rhs = mkFSEntries [mkDir "bar" () []]
+    let res :: Validation () (FSEntries () ())
+        res = interleave [lhs, rhs]
+    res `shouldBe` Success lhs
 
 spec_override :: Spec
 spec_override =
