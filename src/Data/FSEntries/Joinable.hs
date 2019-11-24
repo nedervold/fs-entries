@@ -13,12 +13,12 @@ import Data.Validation (Validation(..), valueOr)
 -- to single applications.  All monads are 'Joinable' via 'join'; not
 -- all 'Applicative' are.
 class Applicative f =>
-      Joinable f where
+      Joinable f
+  where
   join' :: f (f a) -> f a
   default join' :: (Monad f) =>
     f (f a) -> f a
   join' = join
 
-instance Semigroup e =>
-         Joinable (Validation e) where
+instance Semigroup e => Joinable (Validation e) where
   join' = valueOr Failure

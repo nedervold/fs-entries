@@ -1,6 +1,7 @@
 .PHONY : all clean hindent hlint test
 
 HINDENT = hindent --line-length 76 --sort-imports
+HLINT = hlint
 
 test : all
 	stack test

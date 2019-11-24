@@ -20,17 +20,23 @@ import Data.FSEntries.Forest (drawFSEntries)
 import Data.FSEntries.Types
 import qualified Data.Map as M
 import System.Directory
-       (createDirectory, doesDirectoryExist, doesFileExist, listDirectory,
-        makeAbsolute)
+  ( createDirectory
+  , doesDirectoryExist
+  , doesFileExist
+  , listDirectory
+  , makeAbsolute
+  )
 import System.FilePath ((</>), makeRelative)
 import Text.Printf (printf)
 
 -- | Given functions to read directory and file data respectively,
 -- return a function that reads an 'FSEntries' value.
-readFSEntries
-  :: forall d f m.
-     MonadIO m
-  => (FilePath -> m d) -> (FilePath -> m f) -> FilePath -> m (FSEntries d f)
+readFSEntries ::
+     forall d f m. MonadIO m
+  => (FilePath -> m d)
+  -> (FilePath -> m f)
+  -> FilePath
+  -> m (FSEntries d f)
 readFSEntries readDirData readFileData rootDir = do
   exists <- liftIO $ doesDirectoryExist rootDir
   unless exists $
@@ -73,9 +79,8 @@ readFSEntriesFromFS = readFSEntries readDirData readFileData
 -- 'FSEntries' value at a 'FilePath'.  Typically you will only create
 -- the directory and possibly set metadata; the directory will be
 -- filled recursively.
-writeFSEntries
-  :: forall d f m.
-     MonadIO m
+writeFSEntries ::
+     forall d f m. MonadIO m
   => (FilePath -> d -> m ())
   -> (FilePath -> f -> m ())
   -> FilePath
@@ -89,16 +94,15 @@ writeFSEntries writeDir' writeFile' fp entries = do
     writeEntries' dir entries' =
       forM_ (M.toList $ unFSEntries entries') $ \(nm, entry) ->
         let dir' = dir </> nm
-        in case entry of
-             Dir d entries'' -> do
-               writeDir' dir' d
-               writeEntries' dir' entries''
-             File f -> writeFile' dir' f
+         in case entry of
+              Dir d entries'' -> do
+                writeDir' dir' d
+                writeEntries' dir' entries''
+              File f -> writeFile' dir' f
 
 -- | Write an 'FSEntries' value to the filesystem at the given path.
-writeFSEntriesToFS
-  :: MonadIO m
-  => FilePath -> FSEntries () ByteString -> m ()
+writeFSEntriesToFS ::
+     MonadIO m => FilePath -> FSEntries () ByteString -> m ()
 writeFSEntriesToFS = writeFSEntries writeDir' writeFile'
   where
     writeDir' fp () = liftIO $ createDirectory fp

@@ -47,29 +47,29 @@ data FSEntryF f' d f
 ------------------------------------------------------------
 -- | Convert an 'FSEntries' into an 'FSEntriesF'.  The functor must be
 -- applicative, so we have a 'pure'.
-expandEntries
-  :: forall d f f'.
-     Applicative f'
-  => FSEntries d f -> FSEntriesF f' d f
+expandEntries ::
+     forall d f f'. Applicative f'
+  => FSEntries d f
+  -> FSEntriesF f' d f
 expandEntries entries =
   FSEntriesF $ pure . expandEntry <$> unFSEntries entries
 
 -- | Convert an 'FSEntry' into an 'FSEntryF'.  The functor must be
 -- applicative, so we have a 'pure'.
-expandEntry
-  :: forall d f f'.
-     Applicative f'
-  => FSEntry d f -> FSEntryF f' d f
+expandEntry ::
+     forall d f f'. Applicative f'
+  => FSEntry d f
+  -> FSEntryF f' d f
 expandEntry (Dir d entries) = DirF d $ expandEntries entries
 expandEntry (File f) = FileF f
 
 -- | Convert an 'FSEntriesF' into an applicative value of 'FSEntries'.
 -- The applicative gets applied twice, so we need a function to reduce
 -- it.
-contractEntries
-  :: forall f' d f.
-     Joinable f'
-  => FSEntriesF f' d f -> f' (FSEntries d f)
+contractEntries ::
+     forall f' d f. Joinable f'
+  => FSEntriesF f' d f
+  -> f' (FSEntries d f)
 contractEntries entries = FSEntries <$> join' z
   where
     z :: f' (f' (M.Map String (FSEntry d f)))
@@ -79,8 +79,6 @@ contractEntries entries = FSEntries <$> join' z
 -- | Convert an 'FSEntryF' into an applicative value of 'FSEntry'.
 -- The applicative gets applied twice, so we need a function to reduce
 -- it.
-contractEntry
-  :: Joinable f'
-  => FSEntryF f' d f -> f' (FSEntry d f)
+contractEntry :: Joinable f' => FSEntryF f' d f -> f' (FSEntry d f)
 contractEntry (DirF d entries) = Dir d <$> contractEntries entries
 contractEntry (FileF f) = pure $ File f

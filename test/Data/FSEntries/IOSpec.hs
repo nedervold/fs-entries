@@ -6,8 +6,7 @@ import Data.ByteString (ByteString)
 import Data.FSEntries.Generators (genFSEntries)
 import Data.FSEntries.IO (readFSEntriesFromFS, writeFSEntriesToFS)
 import Data.FSEntries.Types
-import Hedgehog
-       (MonadGen, Property, (===), evalIO, forAll, property)
+import Hedgehog (MonadGen, Property, (===), evalIO, forAll, property)
 import Hedgehog.Gen (bytes)
 import Hedgehog.Range (constant)
 import System.IO.Temp (withSystemTempDirectory)
@@ -15,9 +14,7 @@ import System.IO.Temp (withSystemTempDirectory)
 maxSize :: Int
 maxSize = 4 * 1024
 
-genFSEntries'
-  :: MonadGen m
-  => m (FSEntries () ByteString)
+genFSEntries' :: MonadGen m => m (FSEntries () ByteString)
 genFSEntries' = genFSEntries (pure ()) (bytes $ constant 0 maxSize)
 
 hprop_io :: Property

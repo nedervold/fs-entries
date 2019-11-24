@@ -7,8 +7,14 @@ module Data.FSEntries.TypesSpec
 import Data.FSEntries.Generators
 import Hedgehog (Gen)
 import Hedgehog.Classes
-       (bifoldableLaws, bifunctorLaws, bitraversableLaws, foldableLaws,
-        functorLaws, lawsCheckMany, traversableLaws)
+  ( bifoldableLaws
+  , bifunctorLaws
+  , bitraversableLaws
+  , foldableLaws
+  , functorLaws
+  , lawsCheckMany
+  , traversableLaws
+  )
 import Hedgehog.Gen (integral)
 import Hedgehog.Range (linear)
 import Test.Tasty.Hspec (Spec, describe, it, shouldBe)

@@ -44,11 +44,9 @@ data FSEntry d f
   deriving (Eq, Ord, Functor, Foldable, Traversable, Generic, Show)
 
 ------------------------------------------------------------
-instance (NFData d, NFData f) =>
-         NFData (FSEntries d f)
+instance (NFData d, NFData f) => NFData (FSEntries d f)
 
-instance (NFData d, NFData f) =>
-         NFData (FSEntry d f)
+instance (NFData d, NFData f) => NFData (FSEntry d f)
 
 ------------------------------------------------------------
 -- | A convenience function for creating 'FSEntries'.
