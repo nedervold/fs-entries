@@ -16,6 +16,9 @@ module Data.FSEntries.Types
   , mkFSEntries
   , mkDir
   , mkFile
+  , (<//>)
+  , nest
+  , nest1
     -- * Deletion
   , pruneEmptyDirs
   ) where
@@ -26,6 +29,7 @@ import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable (Bitraversable(..))
 import qualified Data.Map as M
 import GHC.Generics (Generic)
+import System.FilePath (splitDirectories)
 
 -- | A datatype representing the contents of a directory.  Files and
 -- directories may contain arbitrary data.
@@ -49,6 +53,25 @@ data FSEntry d f
 instance (NFData d, NFData f) => NFData (FSEntries d f)
 
 instance (NFData d, NFData f) => NFData (FSEntry d f)
+
+------------------------------------------------------------
+-- | Place the 'FSEntries' in a named directory.
+nest1 :: String -> FSEntries () f -> FSEntries () f
+nest1 dirNm entries = FSEntries $ M.fromList [(dirNm, Dir () entries)]
+
+-- | Place the 'FSEntries' in a directory at the 'FilePath'.  Leading
+-- and trailing slashes are ignored.
+nest :: FilePath -> FSEntries () f -> FSEntries () f
+nest fp entries =
+  foldr nest1 entries $
+  case splitDirectories fp of
+    "/":rst -> rst
+    rst -> rst
+
+-- | Place the 'FSEntries' in a directory at the 'FilePath'.  Leading
+-- and trailing slashes are ignored.  A synonym for 'nest'.
+(<//>) :: FilePath -> FSEntries () f -> FSEntries () f
+(<//>) = nest
 
 ------------------------------------------------------------
 -- | A convenience function for creating 'FSEntries'.

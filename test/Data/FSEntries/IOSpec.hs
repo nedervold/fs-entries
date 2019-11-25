@@ -73,7 +73,7 @@ spec_writeFileIfChanged =
         newBS <- readFile fp
         newModTime <- getModificationTime fp
         (newModTime, newBS) `shouldBe` (oldModTime, "old")
-    it "does write different data" $ do
+    it "does write different data" $
       withSystemTempFile
         "fs-entries.Data.FSEntries.IOSpec.spec_writeFileIfChanged" $ \fp h -> do
         hPut h "old"

@@ -4,8 +4,15 @@ module Data.FSEntries.TypesSpec
   ( spec_typeclasses
   ) where
 
-import Data.FSEntries.Generators
-import Data.FSEntries.Types (FSEntries, mkDir, mkFSEntries, pruneEmptyDirs)
+import Data.FSEntries.Generators (genFSEntries, genFSEntry)
+import Data.FSEntries.Types
+  ( FSEntries
+  , (<//>)
+  , mkDir
+  , mkFSEntries
+  , mkFile
+  , pruneEmptyDirs
+  )
 import Hedgehog (Gen)
 import Hedgehog.Classes
   ( bifoldableLaws
@@ -61,6 +68,28 @@ spec_typeclasses = do
                   [mkDir "bar" () [], mkDir "baz" () [mkDir "quux" () []]]
               ]
       pruneEmptyDirs entries `shouldBe` mkFSEntries []
+  describe "nest" $ do
+    it "nests the entries into the directory" $
+      "foo/bar/quux" <//> baseEntries `shouldBe` expected
+    it "ignores trailing slashes" $
+      "foo/bar/quux/" <//> baseEntries `shouldBe` expected
+    it "ignores leading slashes" $
+      "/foo/bar/quux/" <//> baseEntries `shouldBe` expected
+    it "does nothing on empty string" $
+      "" <//> baseEntries `shouldBe` baseEntries
+    it "does nothing on a single slash" $
+      "/" <//> baseEntries `shouldBe` baseEntries
+  where
+    baseEntries :: FSEntries () ()
+    baseEntries = mkFSEntries [mkFile "test.txt" ()]
+    expected :: FSEntries () ()
+    expected =
+      mkFSEntries
+        [ mkDir
+            "foo"
+            ()
+            [mkDir "bar" () [mkDir "quux" () [mkFile "test.txt" ()]]]
+        ]
 
 genInt :: Gen Int
 genInt = integral $ linear 0 1000
