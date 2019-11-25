@@ -19,17 +19,29 @@ module Data.FSEntries.Types
   , (<//>)
   , nest
   , nest1
+    -- * Conversion
+  , toDirList
+  , toFileList
+  , toEntryList
+    -- * Transformation
+  , tupleWithPath
+    -- * Traverse
+  , indexTraverse
+  , indexBitraverse
     -- * Deletion
   , pruneEmptyDirs
   ) where
 
 import Control.DeepSeq (NFData(..))
+import Control.Monad.Reader (Reader, ask, local, runReader)
 import Data.Bifoldable (Bifoldable(..))
 import Data.Bifunctor (Bifunctor(..))
 import Data.Bitraversable (Bitraversable(..))
+import Data.Foldable (Foldable(..))
 import qualified Data.Map as M
+import qualified Data.Set as S
 import GHC.Generics (Generic)
-import System.FilePath (splitDirectories)
+import System.FilePath ((</>), splitDirectories)
 
 -- | A datatype representing the contents of a directory.  Files and
 -- directories may contain arbitrary data.
@@ -87,6 +99,72 @@ mkDir fileName d entries = (fileName, Dir d $ mkFSEntries entries)
 -- Intended to be used as an argument to 'mkFSEntries' or 'mkDir'.
 mkFile :: String -> f -> (String, FSEntry d f)
 mkFile fileName f = (fileName, File f)
+
+------------------------------------------------------------
+-- | For each piece of directory or file data, tuple it up with its
+-- 'FilePath' in the 'FSEntries'.
+tupleWithPath ::
+     forall d f. FSEntries d f -> FSEntries (FilePath, d) (FilePath, f)
+tupleWithPath entries = runReader (doEntries entries) ""
+  where
+    doEntries ::
+         FSEntries d f
+      -> Reader FilePath (FSEntries (FilePath, d) (FilePath, f))
+    doEntries (FSEntries m) = FSEntries . M.fromList <$> mapM doKey keys
+      where
+        keys = S.toList $ M.keysSet m
+        doKey ::
+             String
+          -> Reader FilePath (String, FSEntry (FilePath, d) (FilePath, f))
+        doKey key =
+          local (</> key) $ do
+            let entry = m M.! key
+            entry' <- doEntry entry
+            pure (key, entry')
+    doEntry ::
+         FSEntry d f -> Reader FilePath (FSEntry (FilePath, d) (FilePath, f))
+    doEntry (Dir d entries') = do
+      fp <- ask
+      Dir (fp, d) <$> doEntries entries'
+    doEntry (File f) = do
+      fp <- ask
+      pure $ File (fp, f)
+
+-- | Traverse files in the 'FSEntries' with access to their 'FilePath's.
+indexTraverse ::
+     Applicative m
+  => (FilePath -> f -> m f')
+  -> FSEntries d f
+  -> m (FSEntries d f')
+indexTraverse f entries =
+  bitraverse (pure . snd) (uncurry f) $ tupleWithPath entries
+
+-- | Traverse directories and files in the 'FSEntries' with access to
+-- their 'FilePath's.
+indexBitraverse ::
+     Applicative m
+  => (FilePath -> d -> m d')
+  -> (FilePath -> f -> m f')
+  -> FSEntries d f
+  -> m (FSEntries d' f')
+indexBitraverse f g entries =
+  bitraverse (uncurry f) (uncurry g) $ tupleWithPath entries
+
+------------------------------------------------------------
+toFileList :: FSEntries d f -> [(FilePath, f)]
+toFileList entries = toList $ tupleWithPath entries
+
+toEntryList :: FSEntries d f -> [(FilePath, Either d f)]
+toEntryList entries =
+  bifoldMap
+    (\(fp, d) -> ((fp, Left d) :))
+    (\(fp, f) -> ((fp, Right f) :))
+    (tupleWithPath entries)
+    []
+
+toDirList :: FSEntries d f -> [(FilePath, d)]
+toDirList entries =
+  bifoldMap (\(fp, d) -> ((fp, d) :)) (const id) (tupleWithPath entries) []
 
 ------------------------------------------------------------
 -- | Recursively prune empty directories.

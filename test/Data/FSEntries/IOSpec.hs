@@ -55,14 +55,13 @@ roundtripLazyIO :: FSEntries () ByteString -> IO (FSEntries () ByteString)
 roundtripLazyIO entries =
   withSystemTempDirectory "fs-entries-Data.FSEntries.IOSpec" $ \tmpdir -> do
     writeFSEntriesToFS tmpdir entries
-    entries' :: FSEntries () (IO ByteString) <-
-      lazyReadFSEntriesFromFS tmpdir
+    entries' :: FSEntries () (IO ByteString) <- lazyReadFSEntriesFromFS tmpdir
     sequence entries'
 
 spec_writeFileIfChanged :: Spec
 spec_writeFileIfChanged =
   describe "writeFileIfChanged" $ do
-    it "doesn't write the same data" $ do
+    it "doesn't write the same data" $
       withSystemTempFile
         "fs-entries.Data.FSEntries.IOSpec.spec_writeFileIfChanged" $ \fp h -> do
         hPut h "old"

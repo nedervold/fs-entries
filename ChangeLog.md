@@ -10,4 +10,4 @@ v0.2.0.0 - Fixed nasty typo that broke the combinators.  Wrote tests
 for the combinators.
 
 v0.3.0.0 - Fixed bugs and wrote more tests for the combinators.  Added
-more functions.
+more functions with tests.

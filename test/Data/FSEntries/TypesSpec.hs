@@ -12,7 +12,10 @@ import Data.FSEntries.Types
   , mkFSEntries
   , mkFile
   , pruneEmptyDirs
+  , toEntryList
+  , tupleWithPath
   )
+import qualified Data.Set as S
 import Hedgehog (Gen)
 import Hedgehog.Classes
   ( bifoldableLaws
@@ -79,6 +82,32 @@ spec_typeclasses = do
       "" <//> baseEntries `shouldBe` baseEntries
     it "does nothing on a single slash" $
       "/" <//> baseEntries `shouldBe` baseEntries
+  describe "tupleWithPath" $
+    it "passes sanity check" $
+    tupleWithPath expected `shouldBe`
+    mkFSEntries
+      [ mkDir
+          "foo"
+          ("foo", ())
+          [ mkDir
+              "bar"
+              ("foo/bar", ())
+              [ mkDir
+                  "quux"
+                  ("foo/bar/quux", ())
+                  [mkFile "test.txt" ("foo/bar/quux/test.txt", ())]
+              ]
+          ]
+      ]
+  describe "tupleWithPath" $
+    it "passes sanity check" $
+    S.fromList (toEntryList expected) `shouldBe`
+    S.fromList
+      [ ("foo", Left ())
+      , ("foo/bar", Left ())
+      , ("foo/bar/quux", Left ())
+      , ("foo/bar/quux/test.txt", Right ())
+      ]
   where
     baseEntries :: FSEntries () ()
     baseEntries = mkFSEntries [mkFile "test.txt" ()]
