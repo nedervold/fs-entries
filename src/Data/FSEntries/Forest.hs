@@ -5,6 +5,7 @@ module Data.FSEntries.Forest
   , forestToEntries
     -- * ASCII drawings
   , drawFSEntries
+  , drawFSStructure
   ) where
 
 import Data.Bifunctor (Bifunctor(..))
@@ -47,3 +48,9 @@ drawFSEntries showD showF entries = drawTree (Node "/:" forest')
         f :: (String, Either String String) -> String
         f (filename, Left str) = printf "%s/: %s" filename str
         f (filename, Right str) = printf "%s: %s" filename str
+
+-- | A two-dimensional ASCII drawing of the structure of an
+-- 'FSEntries'.  Ignores the directory and file data.  A wrapper
+-- around 'Data.Tree.drawForest'.
+drawFSStructure :: FSEntries d f -> String
+drawFSStructure = drawFSEntries (const "<dir>") (const "<file>")

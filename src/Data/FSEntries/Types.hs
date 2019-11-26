@@ -23,6 +23,7 @@ module Data.FSEntries.Types
   , toDirList
   , toFileList
   , toEntryList
+  , bundleEntries
     -- * Transformation
   , tupleWithPath
     -- * Traverse
@@ -154,6 +155,10 @@ indexBitraverse f g entries =
 toFileList :: FSEntries d f -> [(FilePath, f)]
 toFileList entries = toList $ tupleWithPath entries
 
+toDirList :: FSEntries d f -> [(FilePath, d)]
+toDirList entries =
+  bifoldMap (\(fp, d) -> ((fp, d) :)) (const id) (tupleWithPath entries) []
+
 toEntryList :: FSEntries d f -> [(FilePath, Either d f)]
 toEntryList entries =
   bifoldMap
@@ -162,9 +167,29 @@ toEntryList entries =
     (tupleWithPath entries)
     []
 
-toDirList :: FSEntries d f -> [(FilePath, d)]
-toDirList entries =
-  bifoldMap (\(fp, d) -> ((fp, d) :)) (const id) (tupleWithPath entries) []
+-- | Bundles the files of an 'FSEntries' value into a single string
+-- for display.  File contents are preceded by a label line.  If the
+-- file does not end in a newline, one is appended.
+bundleEntries :: FSEntries d String -> String
+bundleEntries = concatMap (endWithNewline . uncurry prependLabel) . toFileList
+  where
+    prependLabel :: FilePath -> String -> String
+    prependLabel fp str = l ++ str
+      where
+        l = label fp
+    endWithNewline :: String -> String
+    endWithNewline str =
+      if last str == '\n'
+        then str
+        else str ++ "\n"
+    label :: String -> String
+    label contents = start ++ rest ++ "\n"
+      where
+        start = "---- " ++ contents ++ " "
+        startLen = length start
+        targetLen = 60
+        remainingLen = targetLen - startLen
+        rest = replicate (max remainingLen 4) '-'
 
 ------------------------------------------------------------
 -- | Recursively prune empty directories.
