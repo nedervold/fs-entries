@@ -1,9 +1,9 @@
 module Data.FSEntries.ZipSpec
-  ( hprop_interleave
+{-  ( hprop_interleave
   , hprop_override
   , spec_interleave
   , spec_override
-  ) where
+  ) -} where
 
 import Data.ByteString (ByteString)
 import Data.FSEntries.Generators (genFSEntries)
@@ -21,20 +21,43 @@ maxSize = 4 * 1024
 genFSEntries' :: MonadGen m => m (FSEntries () ByteString)
 genFSEntries' = genFSEntries (pure ()) (bytes $ constant 0 maxSize)
 
-hprop_interleave :: Property
-hprop_interleave =
+hprop_interleaveIdentity :: Property
+hprop_interleaveIdentity =
   property $ do
     entries <- forAll genFSEntries'
-    Success entries === interleave [entries]
-    Success entries === interleave [entries, emptyFSEntries]
+    Right entries === interleave' [entries]
+    Right entries === interleave' [entries, emptyFSEntries]
 
-hprop_override :: Property
-hprop_override =
+hprop_interleaveEqIdentity :: Property
+hprop_interleaveEqIdentity =
   property $ do
     entries <- forAll genFSEntries'
-    Success entries === override [entries]
-    Success entries === override [entries, emptyFSEntries]
-    Success entries === override [entries, emptyFSEntries, entries]
+    Right entries === interleaveEq' [entries]
+    Right entries === interleaveEq' [entries, entries]
+    Right entries === interleaveEq' [entries, emptyFSEntries]
+
+hprop_overrideIdentity :: Property
+hprop_overrideIdentity =
+  property $ do
+    entries <- forAll genFSEntries'
+    Right entries === override' [entries]
+    Right entries === override' [entries, emptyFSEntries]
+    Right entries === override' [entries, emptyFSEntries, entries]
+
+-- hprop_interleave :: Property
+-- hprop_interleave =
+--   property $ do
+--     entries <- forAll genFSEntries'
+--     Success entries === interleave [entries]
+--     Success entries === interleave [entries, emptyFSEntries]
+--
+-- hprop_override :: Property
+-- hprop_override =
+--   property $ do
+--     entries <- forAll genFSEntries'
+--     Success entries === override [entries]
+--     Success entries === override [entries, emptyFSEntries]
+--     Success entries === override [entries, emptyFSEntries, entries]
 
 spec_interleave :: Spec
 spec_interleave =

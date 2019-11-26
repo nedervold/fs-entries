@@ -21,9 +21,8 @@ module Data.FSEntries.Functor
 import Data.FSEntries.Joinable (Joinable(..))
 import Data.FSEntries.Types
 import qualified Data.Map as M
-import GHC.Generics (Generic)
-
 import Data.Validation (Validation)
+import GHC.Generics (Generic)
 import Text.Printf (printf)
 
 type V = Validation ()
