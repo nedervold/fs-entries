@@ -17,6 +17,8 @@ module Data.FSEntries.Types
   , mkDir
   , mkFile
   , (<//>)
+  , singletonDirAt
+  , singletonFileAt
   , nest
   , nest1
     -- * Conversion
@@ -42,7 +44,7 @@ import Data.Foldable (Foldable(..))
 import qualified Data.Map as M
 import qualified Data.Set as S
 import GHC.Generics (Generic)
-import System.FilePath ((</>), splitDirectories)
+import System.FilePath ((</>), joinPath, splitDirectories)
 
 -- | A datatype representing the contents of a directory.  Files and
 -- directories may contain arbitrary data.
@@ -100,6 +102,18 @@ mkDir fileName d entries = (fileName, Dir d $ mkFSEntries entries)
 -- Intended to be used as an argument to 'mkFSEntries' or 'mkDir'.
 mkFile :: String -> f -> (String, FSEntry d f)
 mkFile fileName f = (fileName, File f)
+
+singletonFileAt :: FilePath -> f -> FSEntries () f
+singletonFileAt fp f =
+  case splitDirectories fp of
+    [] -> error "singletonFileAt: empty filepath"
+    ds -> joinPath (init ds) <//> mkFSEntries [mkFile (last ds) f]
+
+singletonDirAt :: FilePath -> FSEntries () f
+singletonDirAt fp =
+  case splitDirectories fp of
+    [] -> error "singletonDirAt: empty filepath"
+    ds -> joinPath (init ds) <//> mkFSEntries [mkDir (last ds) () []]
 
 ------------------------------------------------------------
 -- | For each piece of directory or file data, tuple it up with its

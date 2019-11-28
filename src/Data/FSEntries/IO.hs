@@ -26,6 +26,7 @@ import System.Directory
   ( createDirectory
   , doesDirectoryExist
   , doesFileExist
+  , doesPathExist
   , listDirectory
   , makeAbsolute
   )
@@ -50,8 +51,7 @@ readFSEntries readDirData readFileData rootDir = do
     readEntries dir = do
       entries <- liftIO $ listDirectory (rootDir </> dir)
       mkFSEntries <$>
-        sequence
-          [(entry, ) <$> readEntry (dir </> entry) | entry <- entries]
+        sequence [(entry, ) <$> readEntry (dir </> entry) | entry <- entries]
     readEntry :: FilePath -> m (FSEntry d f)
     readEntry path = do
       isDir <- liftIO $ doesDirectoryExist (rootDir </> path)
@@ -62,9 +62,7 @@ readFSEntries readDirData readFileData rootDir = do
           if isFile
             then readFile' path
             else error $
-                 printf
-                   "readFSEntries: %s is neither directory nor file"
-                   path
+                 printf "readFSEntries: %s is neither directory nor file" path
     readFile' :: FilePath -> m (FSEntry d f)
     readFile' fp = File <$> readFileData (rootDir </> fp)
     readDir :: FilePath -> m (FSEntry d f)
@@ -113,8 +111,7 @@ writeFSEntries writeDir' writeFile' fp entries = do
               File f -> writeFile' dir' f
 
 -- | Write an 'FSEntries' value to the filesystem at the given path.
-writeFSEntriesToFS ::
-     MonadIO m => FilePath -> FSEntries () ByteString -> m ()
+writeFSEntriesToFS :: MonadIO m => FilePath -> FSEntries () ByteString -> m ()
 writeFSEntriesToFS = writeFSEntries writeDir' writeFile'
   where
     writeDir' fp () = liftIO $ createDirectory fp
@@ -132,12 +129,15 @@ writeFSEntriesToFSIfChanged = writeFSEntries writeDir' writeFile'
 -- | Write to the file only if the new value differs from the current.
 writeFileIfChanged :: FilePath -> ByteString -> IO ()
 writeFileIfChanged fp newBS = do
-  currentBS <- BS.readFile fp
-  unless (currentBS == newBS) $ BS.writeFile fp newBS
+  exists <- doesPathExist fp
+  if exists
+    then do
+      currentBS <- BS.readFile fp
+      unless (currentBS == newBS) $ BS.writeFile fp newBS
+    else BS.writeFile fp newBS
 
 -- | Utility function to draw a diagram of a directory and its contents.
 drawDirectory :: FilePath -> IO ()
 drawDirectory fp = do
-  entries <-
-    readFSEntries (pure . makeRelative fp) (pure . makeRelative fp) fp
+  entries <- readFSEntries (pure . makeRelative fp) (pure . makeRelative fp) fp
   putStrLn $ drawFSEntries id id entries
