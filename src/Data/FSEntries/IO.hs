@@ -23,7 +23,7 @@ import Data.FSEntries.Forest (drawFSEntries)
 import Data.FSEntries.Types
 import qualified Data.Map as M
 import System.Directory
-  ( createDirectory
+  ( createDirectoryIfMissing
   , doesDirectoryExist
   , doesFileExist
   , doesPathExist
@@ -114,7 +114,7 @@ writeFSEntries writeDir' writeFile' fp entries = do
 writeFSEntriesToFS :: MonadIO m => FilePath -> FSEntries () ByteString -> m ()
 writeFSEntriesToFS = writeFSEntries writeDir' writeFile'
   where
-    writeDir' fp () = liftIO $ createDirectory fp
+    writeDir' fp () = liftIO $ createDirectoryIfMissing False fp
     writeFile' fp bs = liftIO $ BS.writeFile fp bs
 
 -- | Write an 'FSEntries' value to the filesystem at the given path
@@ -123,7 +123,7 @@ writeFSEntriesToFSIfChanged ::
      MonadIO m => FilePath -> FSEntries () ByteString -> m ()
 writeFSEntriesToFSIfChanged = writeFSEntries writeDir' writeFile'
   where
-    writeDir' fp () = liftIO $ createDirectory fp
+    writeDir' fp () = liftIO $ createDirectoryIfMissing False fp
     writeFile' fp bs = liftIO $ writeFileIfChanged fp bs
 
 -- | Write to the file only if the new value differs from the current.
