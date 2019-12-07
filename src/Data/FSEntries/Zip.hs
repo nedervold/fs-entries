@@ -2,13 +2,20 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Data.FSEntries.Zip where {-  ( -- * merges
+module Data.FSEntries.Zip
+  ( -- * merges
     interleave
+  , interleave'
+  , sureInterleave'
+  , interleaveEq'
+  , sureInterleaveEq'
   , override
+  , override'
+  , sureOverrideEq'
     -- * building blocks
   , MergeFunc
   , mergeAllFSEntries
-  ) -}
+  ) where
 
 import Control.Applicative (liftA2)
 import Control.Monad.Reader (Reader, ask, local, runReader)
@@ -177,7 +184,6 @@ override :: [FSEntries () f] -> V (FSEntries () f)
 override = mergeAllFSEntries overrideMergeFunc
 
 ------------------------------------------------------------
-
 -- | Interleave 'FSEntries' values, returning either a list of
 -- conflicts or the merged result.  If two values both have files at
 -- the same path, that is a file-file conflict.  If one has a file and
@@ -193,7 +199,7 @@ interleave' = toEither . mergeAllFSEntries' interleaveMergeFunc'
 -- message.
 sureInterleave' :: String -> [FSEntries () f] -> FSEntries () f
 sureInterleave' tag = either mkErr id . interleave'
-    where
+  where
     mkErr msgs = error $ unlines (tag : msgs)
 
 -- | Interleave 'FSEntries' values, returning either a list of
@@ -212,7 +218,7 @@ interleaveEq' = toEither . mergeAllFSEntries' interleaveEqMergeFunc'
 -- message.
 sureInterleaveEq' :: Eq f => String -> [FSEntries () f] -> FSEntries () f
 sureInterleaveEq' tag = either mkErr id . interleaveEq'
-    where
+  where
     mkErr msgs = error $ unlines (tag : msgs)
 
 -- | Combine 'FSEntries' by interleaving them, but allowing later
@@ -231,5 +237,5 @@ override' = toEither . mergeAllFSEntries' overrideMergeFunc'
 -- message.
 sureOverrideEq' :: Eq f => String -> [FSEntries () f] -> FSEntries () f
 sureOverrideEq' tag = either mkErr id . override'
-    where
+  where
     mkErr msgs = error $ unlines (tag : msgs)

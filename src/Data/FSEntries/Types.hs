@@ -19,6 +19,8 @@ module Data.FSEntries.Types
   , (<//>)
   , singletonDirAt
   , singletonFileAt
+  , lookup
+  , lookup1
   , nest
   , nest1
     -- * Conversion
@@ -44,7 +46,9 @@ import Data.Foldable (Foldable(..))
 import qualified Data.Map as M
 import qualified Data.Set as S
 import GHC.Generics (Generic)
+import Prelude hiding (lookup)
 import System.FilePath ((</>), joinPath, splitDirectories)
+import Text.Printf (printf)
 
 -- | A datatype representing the contents of a directory.  Files and
 -- directories may contain arbitrary data.
@@ -87,6 +91,28 @@ nest fp entries =
 -- and trailing slashes are ignored.  A synonym for 'nest'.
 (<//>) :: FilePath -> FSEntries () f -> FSEntries () f
 (<//>) = nest
+
+------------------------------------------------------------
+lookup1 :: String -> FSEntries d f -> Maybe (FSEntry d f)
+lookup1 name entries = M.lookup name (unFSEntries entries)
+
+lookup :: FilePath -> FSEntries d f -> Maybe (FSEntry d f)
+lookup fp entries =
+  if null parts
+    then err
+    else go parts entries
+  where
+    parts =
+      case splitDirectories fp of
+        "/":rst -> rst
+        rst -> rst
+    err = error $ printf "lookup %s: empty path" fp
+    go :: [FilePath] -> FSEntries d f -> Maybe (FSEntry d f)
+    go [] _ = error "lookup: impossible"
+    go [nm] entries' = lookup1 nm entries'
+    go (nm:nms) entries' = do
+      Dir _ subentries <- lookup1 nm entries'
+      go nms subentries
 
 ------------------------------------------------------------
 -- | A convenience function for creating 'FSEntries'.

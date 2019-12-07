@@ -1,9 +1,10 @@
 module Data.FSEntries.ZipSpec
-{-  ( hprop_interleave
-  , hprop_override
+  ( hprop_interleaveIdentity
+  , hprop_interleaveEqIdentity
+  , hprop_overrideIdentity
   , spec_interleave
   , spec_override
-  ) -} where
+  ) where
 
 import Data.ByteString (ByteString)
 import Data.FSEntries.Generators (genFSEntries)
@@ -58,7 +59,6 @@ hprop_overrideIdentity =
 --     Success entries === override [entries]
 --     Success entries === override [entries, emptyFSEntries]
 --     Success entries === override [entries, emptyFSEntries, entries]
-
 spec_interleave :: Spec
 spec_interleave =
   describe "interleave" $

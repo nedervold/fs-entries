@@ -1,14 +1,17 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Data.FSEntries.TypesSpec
-  ( spec_typeclasses
+  ( hprop_lookup, spec_typeclasses
   ) where
 
+import Control.Monad (forM_)
+import Data.ByteString (ByteString)
 import Data.FSEntries.Generators (genFSEntries, genFSEntry)
 import Data.FSEntries.Types
   ( FSEntries
+  , FSEntry(..)
   , (<//>)
-  , mkDir
+  , lookup  , mkDir
   , mkFSEntries
   , mkFile
   , pruneEmptyDirs
@@ -16,7 +19,7 @@ import Data.FSEntries.Types
   , tupleWithPath
   )
 import qualified Data.Set as S
-import Hedgehog (Gen)
+import Hedgehog (Gen, MonadGen, Property, (===), forAll, property)
 import Hedgehog.Classes
   ( bifoldableLaws
   , bifunctorLaws
@@ -26,9 +29,27 @@ import Hedgehog.Classes
   , lawsCheckMany
   , traversableLaws
   )
-import Hedgehog.Gen (integral)
-import Hedgehog.Range (linear)
+import Hedgehog.Gen (bytes, integral)
+import Hedgehog.Range (constant, linear)
+import Prelude                   hiding(lookup)
 import Test.Tasty.Hspec (Spec, describe, it, shouldBe)
+
+maxSize :: Int
+maxSize = 4 * 1024
+
+genFSEntries' :: MonadGen m => m (FSEntries () ByteString)
+genFSEntries' = genFSEntries (pure ()) (bytes $ constant 0 maxSize)
+
+hprop_lookup :: Property
+hprop_lookup =
+  property $ do
+    entries <- forAll genFSEntries'
+    let entryList = toEntryList entries
+    forM_ entryList $ \(path, eData) ->
+      (dataOf <$> lookup path entries) === Just eData
+  where
+    dataOf (Dir d _) = Left d
+    dataOf (File f) = Right f
 
 spec_typeclasses :: Spec
 spec_typeclasses = do

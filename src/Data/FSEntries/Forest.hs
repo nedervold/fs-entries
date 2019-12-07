@@ -28,8 +28,7 @@ forestToEntries :: Forest (String, Either d f) -> FSEntries d f
 forestToEntries = mkFSEntries . map treeToPair
 
 treeToPair :: Tree (String, Either d f) -> (String, FSEntry d f)
-treeToPair (Node (name, Left d) forest) =
-  (name, Dir d $ forestToEntries forest)
+treeToPair (Node (name, Left d) forest) = (name, Dir d $ forestToEntries forest)
 treeToPair (Node (name, Right f) forest) =
   if null forest
     then (name, File f)

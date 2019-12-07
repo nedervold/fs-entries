@@ -70,8 +70,7 @@ expandEntries ::
      forall d f f'. Applicative f'
   => FSEntries d f
   -> FSEntriesF f' d f
-expandEntries entries =
-  FSEntriesF $ pure . expandEntry <$> unFSEntries entries
+expandEntries entries = FSEntriesF $ pure . expandEntry <$> unFSEntries entries
 
 -- | Convert an 'FSEntry' into an 'FSEntryF'.  The functor must be
 -- applicative, so we have a 'pure'.
@@ -92,8 +91,7 @@ contractEntries ::
 contractEntries entries = FSEntries <$> join' z
   where
     z :: f' (f' (M.Map String (FSEntry d f)))
-    z =
-      fmap sequenceA $ traverse (fmap contractEntry) $ unFSEntriesF entries
+    z = fmap sequenceA $ traverse (fmap contractEntry) $ unFSEntriesF entries
 
 -- | Convert an 'FSEntryF' into an applicative value of 'FSEntry'.
 -- The applicative gets applied twice, so we need a function to reduce
