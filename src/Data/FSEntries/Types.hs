@@ -19,14 +19,18 @@ module Data.FSEntries.Types
   , (<//>)
   , singletonDirAt
   , singletonFileAt
-  , lookup
-  , lookup1
   , nest
   , nest1
+    -- * Query
+  , lookup
+  , lookup1
     -- * Conversion
   , toDirList
-  , toFileList
+  , toDirMap
   , toEntryList
+  , toEntryMap
+  , toFileList
+  , toFileMap
   , bundleEntries
     -- * Transformation
   , tupleWithPath
@@ -195,9 +199,15 @@ indexBitraverse f g entries =
 toFileList :: FSEntries d f -> [(FilePath, f)]
 toFileList entries = toList $ tupleWithPath entries
 
+toFileMap :: FSEntries d f -> M.Map FilePath f
+toFileMap = M.fromList . toFileList
+
 toDirList :: FSEntries d f -> [(FilePath, d)]
 toDirList entries =
   bifoldMap (\(fp, d) -> ((fp, d) :)) (const id) (tupleWithPath entries) []
+
+toDirMap :: FSEntries d f -> M.Map FilePath d
+toDirMap = M.fromList . toDirList
 
 toEntryList :: FSEntries d f -> [(FilePath, Either d f)]
 toEntryList entries =
@@ -206,6 +216,9 @@ toEntryList entries =
     (\(fp, f) -> ((fp, Right f) :))
     (tupleWithPath entries)
     []
+
+toEntryMap :: FSEntries d f -> M.Map FilePath (Either d f)
+toEntryMap = M.fromList . toEntryList
 
 -- | Bundles the files of an 'FSEntries' value into a single string
 -- for display.  File contents are preceded by a label line.  If the
