@@ -1,0 +1,88 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 9881f920f9d5e9f00afbd826e92bddf449be69445bfaa56a4befb6124fec475a
+
+name:           fs-entries
+version:        0.4.0.0
+synopsis:       Datatype for filesystem-like hierarchical data
+description:    Please see the README on GitHub at <https://github.com/nedervold/fs-entries#readme>
+category:       Data
+homepage:       https://github.com/nedervold/fs-entries#readme
+bug-reports:    https://github.com/nedervold/fs-entries/issues
+author:         Eric Nedervold
+maintainer:     nedervoldsoftware@gmail.com
+copyright:      2019 Eric Nedervold
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/nedervold/fs-entries
+
+library
+  exposed-modules:
+      Data.FSEntries.Forest
+      Data.FSEntries.Functor
+      Data.FSEntries.Generators
+      Data.FSEntries.IO
+      Data.FSEntries.Joinable
+      Data.FSEntries.Types
+      Data.FSEntries.Zip
+  other-modules:
+      Paths_fs_entries
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat
+  build-depends:
+      base >=4.7 && <5
+    , bytestring ==0.10.12.1
+    , containers ==0.6.4.1
+    , deepseq ==1.4.5.0
+    , directory ==1.3.6.2
+    , filepath ==1.4.2.1
+    , hedgehog ==1.0.5
+    , mtl ==2.2.2
+    , temporary ==1.3
+    , validation ==1.1.2
+  default-language: Haskell2010
+
+test-suite fs-entries-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Data.FSEntries.ForestSpec
+      Data.FSEntries.FunctorSpec
+      Data.FSEntries.IOSpec
+      Data.FSEntries.TypesSpec
+      Data.FSEntries.ZipSpec
+      Paths_fs_entries
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , bytestring ==0.10.12.1
+    , containers ==0.6.4.1
+    , deepseq ==1.4.5.0
+    , directory ==1.3.6.2
+    , filepath ==1.4.2.1
+    , fs-entries
+    , hedgehog ==1.0.5
+    , hedgehog-classes ==0.2.5.3
+    , hspec ==2.8.5
+    , mtl ==2.2.2
+    , tasty ==1.4.2.3
+    , tasty-discover ==4.2.4
+    , tasty-hedgehog ==1.1.0.0
+    , tasty-hspec ==1.2.0.1
+    , temporary ==1.3
+    , validation ==1.1.2
+  default-language: Haskell2010
