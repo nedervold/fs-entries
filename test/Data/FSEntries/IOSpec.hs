@@ -23,7 +23,7 @@ import Hedgehog.Range (constant)
 import System.Directory (getModificationTime)
 import System.IO (hClose)
 import System.IO.Temp (withSystemTempDirectory, withSystemTempFile)
-import Test.Tasty.Hspec (Spec, describe, it, shouldBe, shouldNotBe)
+import Test.Hspec (Spec, describe, it, shouldBe, shouldNotBe)
 
 maxSize :: Int
 maxSize = 4 * 1024

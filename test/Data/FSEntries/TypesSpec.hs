@@ -1,7 +1,8 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Data.FSEntries.TypesSpec
-  ( hprop_lookup, spec_typeclasses
+  ( hprop_lookup
+  , spec_typeclasses
   ) where
 
 import Control.Monad (forM_)
@@ -11,7 +12,8 @@ import Data.FSEntries.Types
   ( FSEntries
   , FSEntry(..)
   , (<//>)
-  , lookup  , mkDir
+  , lookup
+  , mkDir
   , mkFSEntries
   , mkFile
   , pruneEmptyDirs
@@ -31,8 +33,8 @@ import Hedgehog.Classes
   )
 import Hedgehog.Gen (bytes, integral)
 import Hedgehog.Range (constant, linear)
-import Prelude                   hiding(lookup)
-import Test.Tasty.Hspec (Spec, describe, it, shouldBe)
+import Prelude hiding (lookup)
+import Test.Hspec (Spec, describe, it, shouldBe)
 
 maxSize :: Int
 maxSize = 4 * 1024

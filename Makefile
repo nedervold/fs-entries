@@ -1,24 +1,24 @@
-.PHONY : all clean hindent hlint test
-
-HINDENT = hindent --sort-imports
-HLINT = hlint
-
-test : all
+.PHONY : test
+test : tidy
 	stack test
 
-all :
+.PHONY : build
+build : 
 	stack build
 
-hindent :
-	find src test -name '*.hs' -exec $(HINDENT) \{} \;
+.PHONY : docs
+docs :
+	stack haddock && open `stack path --local-doc-root`/index.html
 
-hlint :
-	hlint src test
+.PHONY : lint
+lint : 
+	hlint app src test 
 
-reset : clean
-	-rm -rf .stack-work
-
-clean : # hindent
-	stack clean
+.PHONY : tidy
+tidy :
 	find . -name '*~' -delete
 	find . -name '#*' -delete
+
+.PHONY : clean
+clean : tidy
+	stack clean

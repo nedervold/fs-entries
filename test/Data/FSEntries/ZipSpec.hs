@@ -14,7 +14,7 @@ import Data.Validation (Validation(..))
 import Hedgehog (MonadGen, Property, (===), forAll, property)
 import Hedgehog.Gen (bytes)
 import Hedgehog.Range (constant)
-import Test.Tasty.Hspec (Spec, describe, it, shouldBe)
+import Test.Hspec (Spec, describe, it, shouldBe)
 
 maxSize :: Int
 maxSize = 4 * 1024

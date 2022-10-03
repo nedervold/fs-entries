@@ -3,3 +3,4 @@ fs-entries.cabal
 *~
 \#*
 stack.yaml.lock
+.DS_Store
