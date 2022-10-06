@@ -59,19 +59,30 @@ import Text.Printf (printf)
 -- directories may contain arbitrary data.
 newtype FSEntries d f = FSEntries
   { unFSEntries :: M.Map String (FSEntry d f)
-  } deriving ( Eq
-             , Ord
-             , Functor
-             , Foldable
-             , Monoid
-             , Semigroup
-             , Traversable
-             , Generic
-             , Show
-             )
+  } deriving (Eq, Ord, Functor, Foldable, Traversable, Generic, Show)
+
+instance Semigroup d => Semigroup (FSEntries d f) where
+  FSEntries m <> FSEntries m' =
+    FSEntries $ M.fromList [(k, f k) | k <- S.toList ks]
+    where
+      ks :: S.Set String
+      ks = M.keysSet m `S.union` M.keysSet m'
+      f :: String -> FSEntry d f
+      f k =
+        case (M.lookup k m, M.lookup k m') of
+          (Nothing, Nothing) ->
+            error "Semigroup (FSEntries d f).f: impossible by construction"
+          (Nothing, Just fse) -> fse
+          (Just fse, Nothing) -> fse
+          (Just (Dir d fses), Just (Dir d' fses')) ->
+            Dir (d <> d') (fses <> fses')
+          (Just fse, _) -> fse
+
+instance Semigroup d => Monoid (FSEntries d f) where
+  mempty = FSEntries mempty
 
 -- | An empty 'FSEntries' value.
-emptyFSEntries :: FSEntries d f
+emptyFSEntries :: Monoid d => FSEntries d f
 emptyFSEntries = mempty
 
 -- | A datatype representing an element of the contents of a

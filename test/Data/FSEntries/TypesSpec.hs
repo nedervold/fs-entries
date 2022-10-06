@@ -33,7 +33,7 @@ import Hedgehog.Classes
   , semigroupLaws
   , traversableLaws
   )
-import Hedgehog.Gen (bytes, integral)
+import Hedgehog.Gen (bytes, integral, list)
 import Hedgehog.Range (constant, linear)
 import Prelude hiding (lookup)
 import Test.Hspec (Spec, describe, it, shouldBe)
@@ -82,8 +82,8 @@ spec_typeclasses = do
               , bifoldableLaws genFSEntries
               , bifunctorLaws genFSEntries
               , bitraversableLaws genFSEntries
-              , semigroupLaws $ genFSEntries genInt genInt
-              , monoidLaws $ genFSEntries genInt genInt
+              , semigroupLaws $ genFSEntries genInts genInts
+              , monoidLaws $ genFSEntries genInts genInts
               ])
           ]
       passed `shouldBe` True
@@ -149,3 +149,6 @@ spec_typeclasses = do
 
 genInt :: Gen Int
 genInt = integral $ linear 0 1000
+
+genInts :: Gen [Int]
+genInts = list (linear 1 4) genInt
