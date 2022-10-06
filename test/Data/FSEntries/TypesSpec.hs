@@ -29,6 +29,8 @@ import Hedgehog.Classes
   , foldableLaws
   , functorLaws
   , lawsCheckMany
+  , monoidLaws
+  , semigroupLaws
   , traversableLaws
   )
 import Hedgehog.Gen (bytes, integral)
@@ -80,6 +82,8 @@ spec_typeclasses = do
               , bifoldableLaws genFSEntries
               , bifunctorLaws genFSEntries
               , bitraversableLaws genFSEntries
+              , semigroupLaws $ genFSEntries genInt genInt
+              , monoidLaws $ genFSEntries genInt genInt
               ])
           ]
       passed `shouldBe` True

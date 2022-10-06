@@ -6,10 +6,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Data.FSEntries.Types
-  ( -- * Datatypes
-    FSEntries(..)
+    -- * Datatypes
+  ( FSEntries(..)
   , FSEntry(..)
     -- * Construction
   , emptyFSEntries
@@ -58,11 +59,20 @@ import Text.Printf (printf)
 -- directories may contain arbitrary data.
 newtype FSEntries d f = FSEntries
   { unFSEntries :: M.Map String (FSEntry d f)
-  } deriving (Eq, Ord, Functor, Foldable, Traversable, Generic, Show)
+  } deriving ( Eq
+             , Ord
+             , Functor
+             , Foldable
+             , Monoid
+             , Semigroup
+             , Traversable
+             , Generic
+             , Show
+             )
 
 -- | An empty 'FSEntries' value.
 emptyFSEntries :: FSEntries d f
-emptyFSEntries = FSEntries M.empty
+emptyFSEntries = mempty
 
 -- | A datatype representing an element of the contents of a
 -- directory.
