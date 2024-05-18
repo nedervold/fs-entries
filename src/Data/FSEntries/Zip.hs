@@ -3,8 +3,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Data.FSEntries.Zip
-  ( -- * merges
-    interleave
+    -- * merges
+  ( interleave
   , interleave'
   , sureInterleave'
   , interleaveEq'
@@ -17,7 +17,6 @@ module Data.FSEntries.Zip
   , mergeAllFSEntries
   ) where
 
-import Control.Applicative (liftA2)
 import Control.Monad.Reader (Reader, ask, local, runReader)
 import Data.FSEntries.Functor
 import Data.FSEntries.Joinable
@@ -170,7 +169,7 @@ applyLabelsEntries (FSEntriesF m) = do
         Success entry -> Success <$> applyLabelsEntry entry
         Failure msgs -> do
           fp <- ask
-          return $ Failure $ map ($fp) msgs
+          return $ Failure $ map ($ fp) msgs
 
 applyLabelsEntry :: FSEntryF P d f -> R (FSEntryF L d f)
 applyLabelsEntry (FileF f) = return $ FileF f
