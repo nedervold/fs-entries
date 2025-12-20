@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 42883ecb302fc6226d29aef0e97e6156b8dc62deb8e9f15055b31b9455ef5f98
+-- hash: 10edc7680d0b3fa7563f55fead53af2707cecec0a95f17820ed60c1fe0fb4bf8
 
 name:           fs-entries
-version:        0.4.0.0
+version:        0.4.1.0
 synopsis:       Datatype for filesystem-like hierarchical data
 description:    Please see the README on GitHub at <https://github.com/nedervold/fs-entries#readme>
 category:       Data
