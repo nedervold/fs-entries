@@ -1,12 +1,10 @@
 -- | Datatypes for filesystem-like hierarchical data.
-{-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE DeriveFoldable #-}
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Data.FSEntries.Types
     -- * Datatypes
@@ -57,9 +55,11 @@ import Text.Printf (printf)
 
 -- | A datatype representing the contents of a directory.  Files and
 -- directories may contain arbitrary data.
-newtype FSEntries d f = FSEntries
-  { unFSEntries :: M.Map String (FSEntry d f)
-  } deriving (Eq, Ord, Functor, Foldable, Traversable, Generic, Show)
+newtype FSEntries d f =
+  FSEntries
+    { unFSEntries :: M.Map String (FSEntry d f)
+    }
+  deriving (Eq, Ord, Functor, Foldable, Traversable, Generic, Show)
 
 instance Semigroup d => Semigroup (FSEntries d f) where
   FSEntries m <> FSEntries m' =
@@ -88,8 +88,7 @@ emptyFSEntries = mempty
 -- | A datatype representing an element of the contents of a
 -- directory.
 data FSEntry d f
-  = Dir d
-        (FSEntries d f) -- ^ represents a directory
+  = Dir d (FSEntries d f) -- ^ represents a directory
   | File f -- ^ represents a file
   deriving (Eq, Ord, Functor, Foldable, Traversable, Generic, Show)
 

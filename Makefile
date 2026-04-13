@@ -12,7 +12,7 @@ docs :
 
 .PHONY : lint
 lint : 
-	hlint app src test 
+	hlint src test
 
 .PHONY : tidy
 tidy :
